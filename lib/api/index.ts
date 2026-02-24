@@ -2,7 +2,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 // Basic API Client function with authentication support
-
 export const apiClient = {
     get: async (endpoint: string, token?: string | null) => {
         // we need to attach the token in the request header
@@ -13,7 +12,8 @@ export const apiClient = {
         }
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            headers: headers,
+            method: "GET",
+            headers: headers
         })
         console.log(response)
         if(!response.ok) {

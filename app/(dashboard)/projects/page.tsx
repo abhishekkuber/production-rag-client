@@ -90,7 +90,6 @@ const ProjectsPage = () => {
         token,
       );
       const deletedProject = result?.data || {};
-      // setProjects((prev) => prev.filter((obj) => obj !== deletedProject));
       setProjects((prev) => prev.filter((obj) => obj.id !== projectId));
 
       toast.success("Project deleted successfully!");
