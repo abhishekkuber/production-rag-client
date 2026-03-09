@@ -46,6 +46,7 @@ const ProjectsPage = () => {
       // to make an api call, you need access to the JWT token, which you attach in the header
       const token = await getToken();
       const result = await apiClient.get("/api/projects", token);
+
       const { data } = result || {};
       setProjects(data);
     } catch (err) {

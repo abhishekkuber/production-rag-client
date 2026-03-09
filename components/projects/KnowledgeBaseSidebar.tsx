@@ -75,7 +75,7 @@ const documentUtils = {
 
   formatTimeAgo: (dateString: string) => {
     const diffInHours = Math.floor(
-      (Date.now() - new Date(dateString).getTime()) / (1000 * 60 * 60)
+      (Date.now() - new Date(dateString).getTime()) / (1000 * 60 * 60),
     );
     if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
@@ -486,7 +486,7 @@ export function KnowledgeBaseSidebar({
                     .sort(
                       (a, b) =>
                         new Date(b.created_at).getTime() -
-                        new Date(a.created_at).getTime()
+                        new Date(a.created_at).getTime(),
                     )
                     .map((doc) => (
                       <div
@@ -526,11 +526,11 @@ export function KnowledgeBaseSidebar({
                                 doc.processing_status !== "completed" && (
                                   <div className="flex items-center gap-1 text-xs text-gray-400">
                                     {documentUtils.getStatusIcon(
-                                      doc.processing_status
+                                      doc.processing_status,
                                     )}
                                     <span>
                                       {documentUtils.getStatusText(
-                                        doc.processing_status
+                                        doc.processing_status,
                                       )}
                                     </span>
                                   </div>
@@ -732,7 +732,7 @@ export function KnowledgeBaseSidebar({
                         }}
                         disabled={settingsLoading}
                         info={`Keyword weight: ${projectSettings.keyword_weight.toFixed(
-                          1
+                          1,
                         )} (auto-calculated)`}
                       />
                     </section>
