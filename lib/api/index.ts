@@ -13,7 +13,8 @@ export const apiClient = {
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
             method: "GET",
-            headers: headers
+            headers: headers,
+            cache: "no-store",
         })
         console.log(response)
         if(!response.ok) {

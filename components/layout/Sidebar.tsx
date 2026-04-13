@@ -28,7 +28,7 @@ export function Sidebar() {
       {/* Header */}
       <div className="p-3 flex items-center justify-between">
         {!isCollapsed && (
-          <h1 className="text-lg font-medium text-gray-200">OpenSlate</h1>
+          <h1 className="text-lg font-medium text-gray-200">KnowledgeDock</h1>
         )}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}

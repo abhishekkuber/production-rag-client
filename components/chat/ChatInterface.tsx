@@ -38,6 +38,7 @@ interface ChatInterfaceProps {
   streamingMessage?: string;
   isStreaming?: boolean;
   agentStatus?: string;
+  messagesRemaining?: number | null;
   onFeedback?: (messageId: string, type: "like" | "dislike") => void;
 }
 
@@ -52,6 +53,7 @@ export function ChatInterface({
   streamingMessage,
   isStreaming,
   agentStatus,
+  messagesRemaining,
   onFeedback,
 }: ChatInterfaceProps) {
   const handleSendMessage = async (content: string) => {
@@ -100,6 +102,7 @@ export function ChatInterface({
             <ChatInput
               onSendMessage={handleSendMessage}
               disabled={isLoading || (isStreaming ?? false)}
+              messagesRemaining={messagesRemaining}
             />
           </>
         ) : (

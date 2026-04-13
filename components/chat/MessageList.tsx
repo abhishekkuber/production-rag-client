@@ -142,7 +142,8 @@ export function MessageList({
                         ></div>
                       </div>
                       <span className="text-xs text-gray-400 ml-2">
-                        AI is thinking...
+                        {/* AI is thinking... */}
+                        The artificial mind doth ponder...
                       </span>
                     </div>
                   </div>
@@ -157,7 +158,7 @@ export function MessageList({
                   <div className="flex items-center gap-3">
                     <Loader2 size={16} className="text-gray-400 animate-spin" />
                     <span className="text-sm text-gray-300">
-                      {agentStatus || "Thinking..."}
+                      {agentStatus || "Ensuring thy words hold no mischief..."}
                     </span>
                   </div>
                 </div>

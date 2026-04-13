@@ -34,6 +34,9 @@ export default function ProjectChatPage({ params }: ProjectChatPageProps) {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState("");
   const [agentStatus, setAgentStatus] = useState("");
+  const [messagesRemaining, setMessagesRemaining] = useState<number | null>(
+    null,
+  );
 
   // Ref to abort streaming if needed
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -47,6 +50,15 @@ export default function ProjectChatPage({ params }: ProjectChatPageProps) {
   } | null>(null);
 
   const { getToken, userId } = useAuth();
+
+  const fetchChat = async () => {
+    if (!userId) return null;
+
+    const token = await getToken();
+    const result = await apiClient.get(`/api/chats/${chatId}`, token);
+    setCurrentChatData(result.data);
+    return result.data;
+  };
 
   // Send message function with streaming
   const handleSendMessage = async (content: string) => {
@@ -108,7 +120,40 @@ export default function ProjectChatPage({ params }: ProjectChatPageProps) {
         signal: abortControllerRef.current.signal,
       });
 
+      const remainingHeader = response.headers.get("X-RateLimit-Remaining");
+      if (remainingHeader !== null) {
+        const parsedRemaining = Number.parseInt(remainingHeader, 10);
+        if (!Number.isNaN(parsedRemaining)) {
+          setMessagesRemaining(parsedRemaining);
+        }
+      }
+
       if (!response.ok) {
+        if (response.status === 429) {
+          setCurrentChatData((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              messages: prev.messages.filter(
+                (msg) => msg.id !== optimisticMessage.id,
+              ),
+            };
+          });
+          setSendMessageError(
+            "Daily limit reached. You can send more messages tomorrow.",
+          );
+          toast.error("Daily message limit reached");
+          return;
+        }
+        setCurrentChatData((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            messages: prev.messages.filter(
+              (msg) => msg.id !== optimisticMessage.id,
+            ),
+          };
+        });
         throw new Error(`API Error: ${response.status}`);
       }
 
@@ -161,7 +206,6 @@ export default function ProjectChatPage({ params }: ProjectChatPageProps) {
                     break;
 
                   case "done":
-                    // Replace optimistic message with real messages
                     setCurrentChatData((prev) => {
                       if (!prev) return prev;
                       return {
@@ -175,6 +219,9 @@ export default function ProjectChatPage({ params }: ProjectChatPageProps) {
                         ],
                       };
                     });
+                    setMessagesRemaining((prev) =>
+                      prev !== null ? Math.max(prev - 1, 0) : prev,
+                    );
                     setIsStreaming(false);
                     setStreamingMessage("");
                     setAgentStatus("");
@@ -200,7 +247,20 @@ export default function ProjectChatPage({ params }: ProjectChatPageProps) {
           }
         }
       }
+
+      // Sync the full chat from the server after the stream ends.
+      // This catches the AI message even if the final SSE packet is fragmented.
+      await fetchChat();
     } catch (err) {
+      setCurrentChatData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          messages: prev.messages.filter(
+            (msg) => msg.id !== optimisticMessage.id,
+          ),
+        };
+      });
       setSendMessageError("Failed to send message");
       toast.error("Failed to send message");
     } finally {
@@ -233,6 +293,7 @@ export default function ProjectChatPage({ params }: ProjectChatPageProps) {
           rating: feedback.rating,
           comment: feedback.comment,
           category: feedback.category,
+          project_id: projectId,
         },
         token,
       );
@@ -252,11 +313,7 @@ export default function ProjectChatPage({ params }: ProjectChatPageProps) {
       setIsLoadingChatData(true);
 
       try {
-        const token = await getToken();
-        const result = await apiClient.get(`/api/chats/${chatId}`, token);
-        const chatData = result.data;
-
-        setCurrentChatData(chatData);
+        await fetchChat();
         toast.success("Chat loaded");
       } catch (err) {
         toast.error("Failed to load chat. Please try again.");
@@ -265,7 +322,23 @@ export default function ProjectChatPage({ params }: ProjectChatPageProps) {
       }
     };
 
+    const loadQuota = async () => {
+      if (!userId) return;
+
+      try {
+        const token = await getToken();
+        const quotaResult = await apiClient.get(
+          "/api/projects/quota/messages",
+          token,
+        );
+        setMessagesRemaining(quotaResult.data?.remaining ?? null);
+      } catch (err) {
+        setMessagesRemaining(null);
+      }
+    };
+
     loadChat();
+    loadQuota();
   }, [userId, chatId, projectId, getToken]);
 
   useEffect(() => {
@@ -297,6 +370,7 @@ export default function ProjectChatPage({ params }: ProjectChatPageProps) {
         isStreaming={isStreaming}
         streamingMessage={streamingMessage}
         agentStatus={agentStatus}
+        messagesRemaining={messagesRemaining}
       />
       <MessageFeedbackModal
         isOpen={!!feedbackModal}

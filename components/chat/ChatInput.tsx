@@ -6,14 +6,20 @@ import { Send, Loader2 } from "lucide-react";
 interface ChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
   disabled?: boolean;
+  messagesRemaining?: number | null;
 }
 
-export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
+export function ChatInput({
+  onSendMessage,
+  disabled,
+  messagesRemaining = null,
+}: ChatInputProps) {
   const [message, setMessage] = useState("");
+  const quotaReached = messagesRemaining !== null && messagesRemaining <= 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim() && !disabled) {
+    if (message.trim() && !disabled && !quotaReached) {
       await onSendMessage(message.trim());
       setMessage("");
     }
@@ -36,7 +42,7 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask me anything about your documents..."
-              disabled={disabled}
+              disabled={disabled || quotaReached}
               rows={1}
               className="flex-1 resize-none border-0 bg-transparent px-4 py-3 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-0 disabled:opacity-50 min-h-[48px] max-h-32 overflow-y-auto"
               style={{
@@ -54,7 +60,7 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
             <div className="flex items-end p-2">
               <button
                 type="submit"
-                disabled={disabled || !message.trim()}
+                disabled={disabled || !message.trim() || quotaReached}
                 className="flex items-center justify-center w-8 h-8 bg-white hover:bg-gray-100 disabled:bg-gray-600 disabled:cursor-not-allowed text-black disabled:text-gray-400 rounded-lg transition-colors"
               >
                 {disabled ? (
@@ -83,11 +89,12 @@ export function ChatInput({ onSendMessage, disabled }: ChatInputProps) {
               </kbd>{" "}
               for new line
             </p>
-            {message.length > 0 && (
-              <p className="text-xs text-gray-500">
-                {message.length} characters
-              </p>
-            )}
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              {message.length > 0 && <span>{message.length} characters</span>}
+              {messagesRemaining !== null && (
+                <span>{messagesRemaining} messages left today</span>
+              )}
+            </div>
           </div>
         </form>
       </div>
