@@ -21,10 +21,15 @@ export interface Message {
   created_at: string;
   chat_id: string;
   clerk_id: string;
-  citations?: Array<{
-    filename: string;
-    page: number;
-  }>;
+  citations?: Citation[];
+}
+
+export interface Citation {
+  type?: "web" | "document";
+  filename?: string;
+  page?: number;
+  title?: string;
+  url?: string;
 }
 
 export interface ChatWithMessages extends Chat {

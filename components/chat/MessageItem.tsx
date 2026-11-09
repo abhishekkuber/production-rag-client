@@ -2,6 +2,7 @@ import { ThumbsUp, ThumbsDown, User, Bot } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import { Citation } from "@/lib/types";
 
 function isLikelyInlineMath(value: string) {
   const text = value.trim();
@@ -117,10 +118,7 @@ interface Message {
   created_at: string;
   chat_id: string;
   clerk_id: string;
-  citations?: Array<{
-    filename: string;
-    page: number;
-  }>;
+  citations?: Citation[];
 }
 
 interface MessageItemProps {

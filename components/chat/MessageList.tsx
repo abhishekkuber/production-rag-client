@@ -1,6 +1,15 @@
 import { useEffect, useRef } from "react";
 import { MessageItem } from "./MessageItem";
-import { FileText, Loader2 } from "lucide-react";
+import { FileText, Globe, Loader2 } from "lucide-react";
+import { Citation } from "@/lib/types";
+
+function getHostname(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
 
 interface Message {
   id: string;
@@ -9,10 +18,7 @@ interface Message {
   created_at: string;
   chat_id: string;
   clerk_id: string;
-  citations?: Array<{
-    filename: string;
-    page: number;
-  }>;
+  citations?: Citation[];
 }
 
 interface MessageListProps {
@@ -82,36 +88,63 @@ export function MessageList({
                         </div>
 
                         <div className="grid gap-2">
-                          {message.citations.map((citation, citationIndex) => (
-                            <div
-                              key={citationIndex}
-                              className="flex items-center gap-3 bg-[#252525] hover:bg-[#2a2a2a] rounded-lg px-3 py-2 border border-gray-700 hover:border-gray-600 transition-colors"
-                            >
-                              {/* Document Icon */}
-                              <div className="flex-shrink-0 w-7 h-7 bg-[#2a2a2a] border border-gray-600 rounded-md flex items-center justify-center">
-                                <FileText size={12} className="text-gray-400" />
-                              </div>
+                          {message.citations.map((citation, citationIndex) =>
+                            citation.url ? (
+                              /* Web source */
+                              <a
+                                key={citationIndex}
+                                href={citation.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center gap-3 bg-[#252525] hover:bg-[#2a2a2a] rounded-lg px-3 py-2 border border-gray-700 hover:border-gray-600 transition-colors"
+                              >
+                                {/* Web Icon */}
+                                <div className="flex-shrink-0 w-7 h-7 bg-[#2a2a2a] border border-gray-600 rounded-md flex items-center justify-center">
+                                  <Globe size={12} className="text-gray-400" />
+                                </div>
 
-                              {/* Citation Info */}
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-200 truncate">
-                                  {citation.filename}
-                                </p>
-                                <p className="text-xs text-gray-400 mt-0.5">
-                                  Page {citation.page}
-                                </p>
-                              </div>
+                                {/* Citation Info */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-200 truncate">
+                                    {citation.title || citation.url}
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-0.5 truncate">
+                                    {getHostname(citation.url)}
+                                  </p>
+                                </div>
+                              </a>
+                            ) : (
+                              /* Document source */
+                              <div
+                                key={citationIndex}
+                                className="flex items-center gap-3 bg-[#252525] hover:bg-[#2a2a2a] rounded-lg px-3 py-2 border border-gray-700 hover:border-gray-600 transition-colors"
+                              >
+                                {/* Document Icon */}
+                                <div className="flex-shrink-0 w-7 h-7 bg-[#2a2a2a] border border-gray-600 rounded-md flex items-center justify-center">
+                                  <FileText size={12} className="text-gray-400" />
+                                </div>
 
-                              {/* Page Number Badge */}
-                              <div className="flex-shrink-0">
-                                <div className="w-6 h-6 bg-[#2a2a2a] border border-gray-600 rounded-md flex items-center justify-center">
-                                  <span className="text-xs font-medium text-gray-400">
-                                    {citation.page}
-                                  </span>
+                                {/* Citation Info */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-200 truncate">
+                                    {citation.filename}
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    Page {citation.page}
+                                  </p>
+                                </div>
+
+                                {/* Page Number Badge */}
+                                <div className="flex-shrink-0">
+                                  <div className="w-6 h-6 bg-[#2a2a2a] border border-gray-600 rounded-md flex items-center justify-center">
+                                    <span className="text-xs font-medium text-gray-400">
+                                      {citation.page}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            )
+                          )}
                         </div>
                       </div>
                     </div>

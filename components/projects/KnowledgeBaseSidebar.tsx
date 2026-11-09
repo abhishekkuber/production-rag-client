@@ -53,12 +53,12 @@ const EMBEDDING_MODELS = [
 const AGENT_MODE_OPTIONS = [
   {
     value: "simple",
-    label: "Simple RAG",
+    label: "Simple",
     description: "Documents-only search",
   },
   {
     value: "agentic",
-    label: "Agentic RAG",
+    label: "Supervisor",
     description: "Smart tool selection with web search",
   },
 ];
@@ -829,7 +829,7 @@ export function KnowledgeBaseSidebar({
 
                 <hr className="border-gray-800" />
 
-                {/* Performance Impact */}
+                {/* Performance Impact
                 <section className="space-y-4">
                   <h3 className="text-sm font-medium text-gray-200">
                     Performance Impact
@@ -852,7 +852,7 @@ export function KnowledgeBaseSidebar({
                       </div>
                     </div>
                   </div>
-                </section>
+                </section> */}
 
                 {/* Apply Settings Button */}
                 <button
